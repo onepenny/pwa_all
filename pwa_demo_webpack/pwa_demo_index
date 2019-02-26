@@ -1,0 +1,50 @@
+pwa_demo
+(e.g. pwa_demo_lavas_dist)
+
+# pwa产出内容说明
+1. .html中
+   (1)manifest.json文件, 以便支持的浏览器添加到桌面, <link rel="manifest" href='xx/manifest.json'>
+   (2)PUSH/Preload
+   1>
+     <link rel=preload href=/static/js/manifest.7253881e.js as=script>
+     <link rel=preload href=/static/js/vue.60df3e3c.js as=script>
+     <link rel=preload href=/static/js/vendor.a5d7e94e.js as=script>
+     <link rel=preload href=/static/js/index.d3c52d2b.js as=script>
+     <link rel=preload href=/static/css/index.ebbb7aef.css as=style
+     onload="this.onload=null;this.rel='stylesheet';window.STYLE_READY=1;window.mountVue&&window.mountVue();">
+     mountVue: setTimeout(() => {new Vue() 或 app.mount('#app')})
+   2>normalized.css代码
+   3>skeleton代码
+   4>
+      <script type=text/javascript src=/static/js/manifest.7253881e.js></script>
+      <script type=text/javascript src=/static/js/vue.60df3e3c.js></script>
+      <script type=text/javascript src=/static/js/vendor.a5d7e94e.js></script>
+      <script type=text/javascript src=/static/js/index.d3c52d2b.js></script>
+    5> 引用`sw-register.js?v=${Date.now()}`, e.g.通过Script Dom Element
+2. (1)sw-register.js中register service-worker.js并监听install相关事件,
+      service-worker的版本管理使用构建时间或hash, 
+   (2)service-worker中利用workbox完成pwa precache route功能, 
+   (3)workbox.precache.precacheAndRoute_根据文件版本进行资源缓存和路由 使用方法: 
+      1>([]) injectManifest 
+      2>生成缓存清单 ([缓存清单]), 可考虑有gulp或webpack 根据业务分析生成
+      workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
+3.体验增强
+  (1)skeleton
+  (2)appshell: app-header
+  (3)transition
+    <transition
+                :name="pageTransitionEffect"
+                @before-enter="handleBeforeEnter"
+                @after-enter="handleAfterEnter"
+                @before-leave="handleBeforeLeave">
+                <keep-alive
+                    :include="[...keepAlivePages]">
+                    <router-view
+                        :key="routerViewKey"
+                        class="app-view"
+                        :class="[{'app-view-with-header': appHeaderShow}, pageTransitionClass]"
+                        :data-page-id="$route.fullPath"
+                    ></router-view>
+                </keep-alive>
+    </transition>
+  (4)service状态提醒: 离线 更新等.参见官网 https://developers.google.com/web/tools/workbox/guides/advanced-recipes#offer_a_page_reload_for_users
